@@ -79,30 +79,14 @@ ULibraries::ULibraries(const class FPostConstructInitializeProperties& PCIP)
 
 }
 
-Femtoduino::Serial * FemtoduinoPointer = new Femtoduino::Serial("\\\\.\\COM7");
+Femtoduino::Serial * FemtoduinoPointer = new Femtoduino::Serial("\\\\.\\COM4");
 FQuat hq = FQuat::Identity;
 
-FRotator ULibraries::GetFemtoduinoData()
+void ULibraries::WriteFemtoduino()
 {
 
-	/*char* buffer;
-	bool sent = false;
-	buffer = "q\n";
-	*/	bool sent = FemtoduinoPointer->WriteData("y\n", 32);
+	FemtoduinoPointer->WriteData("w\n", 32);
 
-char incomingData[250] = "";
-int dataLength = 250;
-Sleep(50);
-FemtoduinoPointer->ReadData(incomingData, dataLength);
-
-
-FString out = incomingData;
-TArray<FString> s;
-const TCHAR* Delims[] = { TEXT(" ") };
-out.ParseIntoArray(&s, Delims, 1);
-FRotator test(FCString::Atof(*s[1]), FCString::Atof(*s[0]), FCString::Atof(*s[2]));
-
-return test;
 }
 
 
@@ -140,11 +124,11 @@ FRotator ULibraries::GetQRotation()
 {
 
 	float q1, q2, q3, q4;
-	bool sent = FemtoduinoPointer->WriteData("w\n", 32);
+	//bool sent = FemtoduinoPointer->WriteData("w\n", 32);
 	char parse1[10], parse2[10], parse3[10], parse4[10];
 	char incomingData[250];
 	int dataLength = 250;
-	Sleep(50);
+	//Sleep(25);
 	FemtoduinoPointer->ReadData(incomingData, dataLength);
 
 	_memccpy(&parse1, incomingData, ',', 8);
