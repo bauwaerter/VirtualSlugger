@@ -79,7 +79,7 @@ ULibraries::ULibraries(const class FPostConstructInitializeProperties& PCIP)
 
 }
 
-Femtoduino::Serial * FemtoduinoPointer = new Femtoduino::Serial("\\\\.\\COM4");
+Femtoduino::Serial * FemtoduinoPointer = new Femtoduino::Serial("\\\\.\\COM7");
 FQuat hq = FQuat::Identity;
 
 void ULibraries::WriteFemtoduino()
