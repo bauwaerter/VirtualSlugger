@@ -79,8 +79,9 @@ ULibraries::ULibraries(const class FPostConstructInitializeProperties& PCIP)
 
 }
 
-Femtoduino::Serial * FemtoduinoPointer = new Femtoduino::Serial("\\\\.\\COM5");
+Femtoduino::Serial * FemtoduinoPointer = new Femtoduino::Serial("\\\\.\\COM7");
 FQuat hq = FQuat::Identity;
+FQuat grav = FQuat::Identity;
 
 void ULibraries::WriteFemtoduino()
 {
@@ -115,6 +116,7 @@ void ULibraries::SetHome(FRotator h)
 
 
 	FQuat newQ = FQuat(-q2, -q3, -q4, q1);
+	
 	hq = newQ;
 }
 
@@ -154,7 +156,7 @@ FRotator ULibraries::GetQRotation()
 	{
 		return (hq*newQ).Rotator();
 	}
-
+	grav = newQ;
 	//newQ.Normalize(1.1);
 	//FQuat hq = FQuat::Identity;
 	//FQuat next = newQ*hq;     //FQuat::Slerp(newQ,current.Quaternion(),.5);
@@ -165,22 +167,43 @@ FRotator ULibraries::GetQRotation()
 
 FVector ULibraries::UpdateVelocity()
 {
-	float acc[3];
-	int length1, length2;
-	char accString[10];
+	float acc1,acc2,acc3;
+	int length1 = 0;
+	int length2=0;
+	char accString[10] ="";
+	
 
 	_memccpy(&accString, &incomingData[36], ',', 8);
 	length1 = strlen(accString);
-	acc[0] = atof(accString);
+	acc1 = atof(accString);// / 16384;
+	memset(accString, 0, 10);
 	_memccpy(&accString, &incomingData[36 + length1], ',', 8);
 	length2 = strlen(accString);
-	acc[1] = atof(accString);
+
+	acc2 = atof(accString);// / 16384;
+	memset(accString, 0, 10);
 	_memccpy(&accString, &incomingData[36 + length1 + length2], ',', 8);
-	acc[2] = atof(accString);
+	acc3 = atof(accString);// / 16384;
+	//FQuat(q2, q3, q4, q1);
+	//0w, 1x, 2y, 3z
+	acc1 = acc1 / 16384 ;
+	acc2 = acc2 / 16384 ;
+	acc3 = acc3 / 16384 ;
 
-	FVector vector = FVector(acc[0], acc[1], acc[2]);
+	acc1 -= (2 * (grav.X * grav.Z - grav.W * grav.Y));
+	acc2 -= (2 * (grav.W * grav.X + grav.Y * grav.Z));
+	acc3 -= (grav.W * grav.W - grav.X * grav.X - grav.Y * grav.Y + grav.Z * grav.Z);
+
+	acc1 = acc1 * 9.81;
+	acc2 = acc2 * 9.81;
+	acc3 = acc3 * 9.81;
+
+	FVector vector = FVector(acc1, acc2, acc3);
+
+
+	memset(incomingData, 0, 250);
 	return vector;
-
+	
 
 }
 
