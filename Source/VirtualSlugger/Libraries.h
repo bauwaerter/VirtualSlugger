@@ -11,9 +11,13 @@ class VIRTUALSLUGGER_API ULibraries : public UBlueprintFunctionLibrary
 {
 	GENERATED_UCLASS_BODY()
 
-		UFUNCTION(BlueprintCallable, Category = "Femtoduino Libraries")
+	UFUNCTION(BlueprintCallable, Category = "Femtoduino Libraries")
 
 		static FRotator GetQRotation();
+
+	UFUNCTION(BlueprintCallable, Category = "Femtoduino Libraries")
+
+		static FVector UpdateVelocity();
 
 	UFUNCTION(BlueprintCallable, Category = "Femtoduino Libraries")
 		static void WriteFemtoduino();
