@@ -81,6 +81,7 @@ ULibraries::ULibraries(const class FPostConstructInitializeProperties& PCIP)
 
 Femtoduino::Serial * FemtoduinoPointer = new Femtoduino::Serial("\\\\.\\COM7");
 FQuat hq = FQuat::Identity;
+FQuat grav = FQuat::Identity;
 
 void ULibraries::WriteFemtoduino()
 {
@@ -115,10 +116,11 @@ void ULibraries::SetHome(FRotator h)
 
 
 	FQuat newQ = FQuat(-q2, -q3, -q4, q1);
+	
 	hq = newQ;
 }
 
-
+char incomingData[250];
 
 FRotator ULibraries::GetQRotation()
 {
@@ -126,7 +128,9 @@ FRotator ULibraries::GetQRotation()
 	float q1, q2, q3, q4;
 	//bool sent = FemtoduinoPointer->WriteData("w\n", 32);
 	char parse1[10], parse2[10], parse3[10], parse4[10];
-	char incomingData[250];
+	
+	
+	
 	int dataLength = 250;
 	//Sleep(25);
 	FemtoduinoPointer->ReadData(incomingData, dataLength);
@@ -135,6 +139,8 @@ FRotator ULibraries::GetQRotation()
 	_memccpy(&parse2, &incomingData[9], ',', 8);
 	_memccpy(&parse3, &incomingData[18], ',', 8);
 	_memccpy(&parse4, &incomingData[27], ',', 8);
+
+	
 
 
 
@@ -150,7 +156,7 @@ FRotator ULibraries::GetQRotation()
 	{
 		return (hq*newQ).Rotator();
 	}
-
+	grav = newQ;
 	//newQ.Normalize(1.1);
 	//FQuat hq = FQuat::Identity;
 	//FQuat next = newQ*hq;     //FQuat::Slerp(newQ,current.Quaternion(),.5);
@@ -159,7 +165,47 @@ FRotator ULibraries::GetQRotation()
 	return newQ.Rotator();
 }
 
+FVector ULibraries::UpdateVelocity()
+{
+	float acc1,acc2,acc3;
+	int length1 = 0;
+	int length2=0;
+	char accString[10] ="";
+	
 
+	_memccpy(&accString, &incomingData[36], ',', 8);
+	length1 = strlen(accString);
+	acc1 = atof(accString);// / 16384;
+	memset(accString, 0, 10);
+	_memccpy(&accString, &incomingData[36 + length1], ',', 8);
+	length2 = strlen(accString);
+
+	acc2 = atof(accString);// / 16384;
+	memset(accString, 0, 10);
+	_memccpy(&accString, &incomingData[36 + length1 + length2], ',', 8);
+	acc3 = atof(accString);// / 16384;
+	//FQuat(q2, q3, q4, q1);
+	//0w, 1x, 2y, 3z
+	acc1 = acc1 / 16384 ;
+	acc2 = acc2 / 16384 ;
+	acc3 = acc3 / 16384 ;
+
+	acc1 -= (2 * (grav.X * grav.Z - grav.W * grav.Y));
+	acc2 -= (2 * (grav.W * grav.X + grav.Y * grav.Z));
+	acc3 -= (grav.W * grav.W - grav.X * grav.X - grav.Y * grav.Y + grav.Z * grav.Z);
+
+	acc1 = acc1 * 9.81;
+	acc2 = acc2 * 9.81;
+	acc3 = acc3 * 9.81;
+
+	FVector vector = FVector(acc1, acc2, acc3);
+
+
+	memset(incomingData, 0, 250);
+	return vector;
+	
+
+}
 
 
 //FString ULibraries::GetStuff()
