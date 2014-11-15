@@ -118,7 +118,7 @@ void ULibraries::SetHome(FRotator h)
 	hq = newQ;
 }
 
-
+char incomingData[250];
 
 FRotator ULibraries::GetQRotation()
 {
@@ -126,7 +126,9 @@ FRotator ULibraries::GetQRotation()
 	float q1, q2, q3, q4;
 	//bool sent = FemtoduinoPointer->WriteData("w\n", 32);
 	char parse1[10], parse2[10], parse3[10], parse4[10];
-	char incomingData[250];
+	
+	
+	
 	int dataLength = 250;
 	//Sleep(25);
 	FemtoduinoPointer->ReadData(incomingData, dataLength);
@@ -135,6 +137,8 @@ FRotator ULibraries::GetQRotation()
 	_memccpy(&parse2, &incomingData[9], ',', 8);
 	_memccpy(&parse3, &incomingData[18], ',', 8);
 	_memccpy(&parse4, &incomingData[27], ',', 8);
+
+	
 
 
 
@@ -159,7 +163,26 @@ FRotator ULibraries::GetQRotation()
 	return newQ.Rotator();
 }
 
+FVector ULibraries::UpdateVelocity()
+{
+	float acc[3];
+	int length1, length2;
+	char accString[10];
 
+	_memccpy(&accString, &incomingData[36], ',', 8);
+	length1 = strlen(accString);
+	acc[0] = atof(accString);
+	_memccpy(&accString, &incomingData[36 + length1], ',', 8);
+	length2 = strlen(accString);
+	acc[1] = atof(accString);
+	_memccpy(&accString, &incomingData[36 + length1 + length2], ',', 8);
+	acc[2] = atof(accString);
+
+	FVector vector = FVector(acc[0], acc[1], acc[2]);
+	return vector;
+
+
+}
 
 
 //FString ULibraries::GetStuff()
