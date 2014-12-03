@@ -24,7 +24,6 @@ public class VirtualSlugger : ModuleRules
         {
             isLibrarySupported = true;
 
-            //string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "x64" : "x86";
             string LibrariesPath = Path.Combine(ThirdPartyPath, "Femtoduino", "Libraries");
 
             PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "Femtoduino.lib"));
